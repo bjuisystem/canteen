@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>个人信息</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Material Design Lite">
+    <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
+    <meta name="msapplication-TileColor" content="#3372DF">
+    <link rel="icon" sizes="192x192" th:href="@{/frontStatic/image/logo.png}">
+    <link rel="apple-touch-icon-precomposed" th:href="@{/frontStatic/image/logo.png}">
+    <link rel="shortcut icon" th:href="@{/frontStatic/image/logo.png}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" th:href="@{https://code.getmdl.io/1.3.0/material.cyan-light_blue.min.css}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/infostyle.css}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/main.css}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/frontStatic/css/sweetalert.css}">
+    <script type="text/javascript" th:src="@{/frontStatic/js/jquery.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/js/sweetalert.min.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/css/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/js/front/information.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/js/holder.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/js/front/sort.js}"></script>
+    <style>
+        /* ====================================== */
+        /* 核心修改：橘色系背景 + 遮罩层 */
+        /* ====================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            /* 橘色系渐变背景 + 轻微纹理（替代原图片，也可保留图片叠加渐变） */
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 30%, #FF8C00 60%, #FFA500 100%) center center fixed;
+            background-size: cover;
+            color: #f5f5f5; /* 浅白色文字，适配橘色背景 */
+            font-family: 'Microsoft Yahei', 'PingFang SC', Arial, sans-serif;
+            line-height: 1.5;
+            position: relative;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        /* 橘色系半透明遮罩，增强层次感 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(51, 26, 0, 0.7); /* 深橘色遮罩，可调整透明度 */
+            z-index: -1;
+        }
+
+        /* ====================================== */
+        /* 悬浮购物车：适配橘色系主色 */
+        /* ====================================== */
+        .floating-cart {
+            position: fixed;
+            bottom: 20px;
+            right: 13%;
+            color: #FF9800; /* 亮橘色主色 */
+            cursor: pointer;
+            width: 60px;
+            height: 60px;
+            font-size: 40px;
+            /* 玻璃拟态：购物车按钮 */
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            transition: all 0.3s ease;
+        }
+
+        .floating-cart:hover {
+            color: #ffffff;
+            background: rgba(255, 152, 0, 0.8); /* 亮橘色背景 */
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 5px 25px rgba(255, 152, 0, 0.6);
+        }
+
+        .templatemo-blue-button {
+            background-color: #FF9800; /* 橘色按钮 */
+            border: none;
+            color: white;
+        }
+
+        /* ====================================== */
+        /* 顶部导航栏：橘色系玻璃拟态 */
+        /* ====================================== */
+        .top-nav-right {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            padding: 0;
+            list-style: none;
+        }
+
+        .top-nav-right li {
+            margin-left: 20px;
+        }
+
+        .top-nav-right a {
+            color: #f5f5f5 !important; /* 浅白色文字 */
+            font-size: 14px;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .top-nav-right a:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: #FFD700 !important; /* 金黄色hover文字 */
+        }
+
+        .top-nav-right .material-icons {
+            margin-right: 6px;
+            font-size: 16px;
+        }
+
+        .logout-btn {
+            color: #FFE4B5 !important; /* 浅橘色退出按钮 */
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(255, 127, 80, 0.2) !important;
+            color: #FF6347 !important; /* 番茄红hover */
+        }
+
+        /* ====================================== */
+        /* MDL导航栏：橘色系背景覆盖 */
+        /* ====================================== */
+        .demo-layout .mdl-layout__header {
+            background: rgba(139, 69, 19, 0.6) !important; /* 深橘色玻璃拟态 */
+            backdrop-filter: blur(15px) !important;
+            -webkit-backdrop-filter: blur(15px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        /* ====================================== */
+        /* 轮播图样式：适配橘色系 */
+        /* ====================================== */
+        :root {
+            --post-spacing: 1.78vw;
+            --post-size: 25vw;
+            --mask-size: 100vw;
+        }
+
+        .title {
+            position: absolute;
+            left: 50%;
+            top: 2%;
+            transform: translate(-50%, -5%);
+            z-index: 10;
+        }
+
+        .title p {
+            font-size: 4rem;
+            font-weight: 800;
+            white-space: nowrap;
+            color: #ffffff;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        #banner {
+            overflow: hidden;
+            position: relative;
+            width: 100vw;
+            height: calc(var(--post-size) / 0.72);
+            -webkit-mask: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDQwIiBoZWlnaHQ9IjUwMCIgdmlld0JveD0iMCAwIDE0NDAgNTAwIiBpZD0iaiI+CiAgPHBhdGggZmlsbD0icmdiKDIwMCwyMDAsMjAwKSIgZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMCAwczI3NS4wNCAxMDAgNzIwIDEwMFMxNDQwIDAgMTQ0MCAwdjUwMHMtMjc1LjA0LTEwMC03MjAtMTAwUzAgNTAwIDAgNTAwVjB6Ii8+Cjwvc3ZnPgo=);
+            mask: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDQwIiBoZWlnaHQ9IjUwMCIgdmlld0JveD0iMCAwIDE0NDAgNTAwIiBpZD0iaiI+CiAgPHBhdGggZmlsbD0icmdiKDIwMCwyMDAsMjAwKSIgZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMCAwczI3NS4wNCAxMDAgNzIwIDEwMFMxNDQwIDAgMTQ0MCAwdjUwMHMtMjc1LjA0LTEwMC03MjAtMTAwUzAgNTAwIDAgNTAwVjB6Ii8+Cjwvc3ZnPgo=);
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            mask-position: center;
+            -webkit-mask-size: var(--mask-size);
+            mask-size: var(--mask-size);
+            margin: 20px 0;
+            position: relative;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            /* 橘色系玻璃拟态 */
+            background: rgba(205, 133, 63, 0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #banner .img-wrapper {
+            display: flex;
+            position: absolute;
+            width: 100%;
+            height: calc(var(--post-size) / 0.72);
+            transform: translate(13.39vw, 0);
+            animation: admission 1.5s;
+        }
+
+        #banner .img-wrapper .img-box {
+            height: 100%;
+            display: inline-block;
+            margin-right: var(--post-spacing);
+            position: relative;
+            cursor: pointer;
+        }
+
+        #banner .img-wrapper .img-box .info {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            background: rgba(139, 69, 19, 0.7); /* 深橘色遮罩 */
+            text-align: center;
+            color: #fff9f1;
+            font-size: 2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #banner .img-wrapper .img-box:hover .info {
+            opacity: 1;
+        }
+
+        #banner .img-wrapper .img-box img {
+            width: var(--post-size);
+            height: 100%;
+            object-position: center;
+            object-fit: cover;
+            filter: brightness(0.9) contrast(1.1) saturate(1.2); /* 增强橘色氛围 */
+        }
+
+        #banner .img-wrapper .img-box:last-child {
+            transform: translate(-160.68vw, 0);
+        }
+
+        /* 轮播图按钮组：橘色系 */
+        .btn-group {
+            height: 15vh;
+            position: absolute;
+            left: 50%;
+            bottom: 0%;
+            transform: translate(-50%, -50%);
+            transition: 1s;
+            opacity: 0;
+            z-index: 10;
+        }
+
+        .btn-group .btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(205, 133, 63, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            margin: 10px;
+            cursor: pointer;
+            transition: 0.4s;
+            box-sizing: border-box;
+        }
+
+        .btn-group .btn:hover {
+            transform: scale(1.2);
+            background: rgba(255, 140, 0, 0.8);
+            border-color: transparent;
+        }
+
+        .btn-group .btn:hover .icon {
+            fill: #fff;
+        }
+
+        .btn-group .btn .icon {
+            width: 30px;
+            height: 30px;
+            fill: #f5f5f5;
+        }
+
+        .btn-group .btn .right {
+            transform: rotate(180deg);
+        }
+
+        .img-list {
+            left: 0;
+        }
+
+        @keyframes admission {
+            0% {
+                transform: translate(140vw, 0);
+            }
+            100% {
+                transform: translate(13.39vw, 0);
+            }
+        }
+
+        /* ====================================== */
+        /* 主内容区域：橘色系玻璃拟态 */
+        /* ====================================== */
+        .mdl-layout__content {
+            background: rgba(160, 82, 45, 0.5) !important;
+            backdrop-filter: blur(15px) !important;
+            -webkit-backdrop-filter: blur(15px) !important;
+            border-radius: 12px;
+            margin: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .content {
+            padding: 20px;
+            position: relative;
+            min-height: 80vh;
+        }
+
+        /* ====================================== */
+        /* 分类横向导航：橘色系 */
+        /* ====================================== */
+        .category-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            padding: 10px 0;
+            background: rgb(227, 139, 38);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .category-nav .nav-item {
+            margin: 0 20px;
+            padding: 10px 25px;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #ffdab9; /* 浅橘色未激活 */
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .category-nav .nav-item:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .category-nav .nav-item.active {
+            color: #FFD700; /* 金黄色激活 */
+            border-bottom: 3px solid #FF9800; /* 亮橘色下划线 */
+            background: rgba(255, 140, 0, 0.2);
+        }
+
+        /* ====================================== */
+        /* 菜品模块：橘色系玻璃拟态卡片 */
+        /* ====================================== */
+        .module {
+            margin-top: 20px;
+            padding-bottom: 30px;
+        }
+
+        .category-content {
+            display: none;
+        }
+
+        .category-content.active {
+            display: block;
+        }
+
+        .module .hd {
+            position: relative;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .module .hd h2 {
+            border-left: none;
+            border-bottom: 4px solid #FF9800; /* 亮橘色下划线 */
+            padding: 10px 20px;
+            font-size: 2.2rem !important;
+            font-weight: 600;
+            color: #ffffff;
+            display: inline-block;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .module .hd hr {
+            display: none;
+        }
+
+        .data ul {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            padding: 0 10px;
+            margin: 0;
+            justify-content: center;
+        }
+
+        .data-item-li {
+            list-style: none;
+            flex: 0 0 calc(20% - 25px);
+            max-width: calc(20% - 25px);
+            box-sizing: border-box;
+            /* 橘色系玻璃拟态卡片 */
+            background: rgba(230, 149, 105, 0.93);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .data-item-li:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 140, 0, 0.3);
+            background: rgba(160, 82, 45, 0.8);
+        }
+
+        .data-item-li .to-big {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .data-item-li .to-big img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .data-item-li:hover .to-big img {
+            transform: scale(1.08);
+        }
+
+        .data-item-li .text-right {
+            text-align: center;
+            margin: 0;
+            padding: 0 5px;
+        }
+
+        .data-item-li .text-right a {
+            font-size: 1.5rem !important;
+            color: #ffffff !important;
+            text-decoration: none;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .data-item-li .text-right a:hover {
+            color: #FFD700 !important; /* 金黄色hover */
+        }
+
+        .data-item-li .text-right b {
+            font-size: 1.6rem !important;
+            color: #FFD700 !important; /* 金黄色价格 */
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(255, 140, 0, 0.4);
+        }
+
+        /* ====================================== */
+        /* 响应式适配 */
+        /* ====================================== */
+        @media (max-width: 1200px) {
+            .data-item-li {
+                flex: 0 0 calc(25% - 25px);
+                max-width: calc(25% - 25px);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .data-item-li {
+                flex: 0 0 calc(33.33% - 25px);
+                max-width: calc(33.33% - 25px);
+            }
+            .category-nav .nav-item {
+                margin: 0 10px;
+                padding: 8px 15px;
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .data-item-li {
+                flex: 0 0 calc(50% - 25px);
+                max-width: calc(50% - 25px);
+            }
+            .data-item-li .to-big {
+                height: 150px;
+            }
+            .category-nav {
+                flex-wrap: wrap;
+            }
+            .category-nav .nav-item {
+                margin: 5px 10px;
+            }
+            .title p {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .data-item-li {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            .data-item-li .to-big {
+                height: 200px;
+            }
+            .module {
+                margin-top: 30px;
+                padding-bottom: 20px;
+            }
+            .title p {
+                font-size: 1.8rem;
+            }
+            #banner {
+                height: calc(var(--post-size) / 1.2);
+            }
+        }
+
+        /* ====================================== */
+        /* 兼容不支持backdrop-filter的浏览器 */
+        /* ====================================== */
+        @supports not (backdrop-filter: blur(1px)) {
+            body::before {
+                background: rgba(51, 26, 0, 0.9);
+            }
+            .mdl-layout__content {
+                background: linear-gradient(145deg, #8B4513 0%, #D2691E 100%) !important;
+            }
+            .data-item-li {
+                background: #8B4513;
+            }
+            .category-nav {
+                background: #8B4513;
+            }
+            .floating-cart {
+                background: #8B4513;
+            }
+            .btn-group .btn {
+                background: #8B4513;
+            }
+            #banner {
+                background: #8B4513;
+            }
+            .demo-layout .mdl-layout__header {
+                background: #8B4513 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- 移除原有bg-container，改用body背景+伪元素遮罩 -->
+
+<!-- 移除左侧抽屉布局，改用固定头部+右侧横向导航 -->
+<div class="demo-layout mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <!-- 顶部导航栏（包含右侧横向导航） -->
+    <header class="demo-header mdl-layout__header mdl-color--blue-grey-900 mdl-color-text--white" style="min-height: 60px; height: 60px;">
+        <div class="mdl-layout__header-row" style="padding: 0 24px;">
+            <!-- 左侧Logo -->
+            <div class="mdl-layout-title" style="display: flex; align-items: center;">
+                <img class="logo" style="height: 40px; width: 40px; margin-right: 12px;" src="/admin/images/大食堂.jpg" alt="大食堂logo">
+                <span style="font-size: 18px; color: #ffffff;">大食堂</span> <!-- 白色文字适配 -->
+            </div>
+
+            <!-- 右侧横向导航 -->
+            <ul class="top-nav-right">
+                <li>
+                    <a th:href="@{/front/toMain}">
+                        <i class="material-icons">menu_book</i>菜单
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/front/toOrder}">
+                        <i class="material-icons">receipt</i>今日订单
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/front/toMonOrder}">
+                        <i class="material-icons">insert_chart</i>月度订单
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/front/toInfo}">
+                        <i class="material-icons">person</i>个人信息
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/front/logout}" class="logout-btn">
+                        <i class="material-icons">exit_to_app</i>退出
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- 主内容区域（无需再留左侧间距） -->
+    <main class="mdl-layout__content">
+        <div class="content">
+            <!-- 轮播图区域（从指定代码集成，放在菜肴模块上方） -->
+            <div class="title">
+                <p> Hello! 👋🏾 Welcome to our restaurant！</p>
+            </div>
+            <div id="banner">
+                <div class="img-list img-wrapper">
+                    <div class="img-box">
+                        <div class="info">
+                            <h3>Delicious food awaits you</h3>
+                        </div>
+                        <img th:src="@{/picture/1.jpg}" alt="轮播图1"> <!-- 替换为实际图片路径，使用thymeleaf语法 -->
+                    </div>
+                    <div class="img-box">
+                        <div class="info">
+                            <h3>Delicious food awaits you</h3>
+                        </div>
+                        <img th:src="@{/picture/2.jpg}" alt="轮播图2">
+                    </div>
+                    <div class="img-box">
+                        <div class="info">
+                            <h3>Delicious food awaits you</h3>
+                        </div>
+                        <img th:src="@{/picture/3.jpg}" alt="轮播图3">
+                    </div>
+                    <div class="img-box">
+                        <div class="info">
+                            <h3>Delicious food awaits you</h3>
+                        </div>
+                        <img th:src="@{/picture/4.jpg}" alt="轮播图4">
+                    </div>
+                    <div class="img-box">
+                        <div class="info">
+                            <h3>Delicious food awaits you</h3>
+                        </div>
+                        <img th:src="@{/picture/5.jpg}" alt="轮播图5">
+                    </div>
+                    <div class="img-box" id="last-img-box">
+                        <div class="info">
+                            <h3>Delicious food awaits you</h3>
+                        </div>
+                        <img th:src="@{/picture/6.jpg}" alt="轮播图6">
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- 新增：分类横向导航栏 -->
+            <div class="category-nav">
+                <div class="nav-item active" data-category="菜肴">菜肴</div>
+                <div class="nav-item" data-category="甜点">甜点</div>
+                <div class="nav-item" data-category="主食">主食</div>
+                <div class="nav-item" data-category="饮品">饮品</div>
+            </div>
+
+            <!-- 菜品内容区域：整合所有分类 -->
+            <!-- 菜肴分类 -->
+            <div class="module category-content active" id="category-菜肴" data-category="菜肴">
+                <div class="hd">
+                    <h2>菜肴</h2>
+                </div>
+                <div class="bd">
+                    <div class="data">
+                        <ul>
+                            <li class="data-item-li" th:each="menu : ${session.menuList}" th:if="${menu.category == '菜肴'}">
+                                <div class="to-big">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}">
+                                        <img th:src="@{|/picture/${menu.picture}|}" alt="菜品图片" />
+                                    </a>
+                                </div>
+                                <p class="text-right">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}" th:text="${menu.name}">菜品</a>
+                                </p>
+                                <div class="text-right">
+                                    <b th:text="'￥' + ${menu.price}">￥00.00</b>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 甜点分类 -->
+            <div class="module category-content" id="category-甜点" data-category="甜点">
+                <div class="hd">
+                    <h2>甜点</h2>
+                </div>
+                <div class="bd">
+                    <div class="data">
+                        <ul>
+                            <li class="data-item-li" th:each="menu : ${session.menuList}" th:if="${menu.category == '甜点'}">
+                                <div class="to-big">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}">
+                                        <img th:src="@{|/picture/${menu.picture}|}" alt="菜品图片" />
+                                    </a>
+                                </div>
+                                <p class="text-right">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}" th:text="${menu.name}">菜品</a>
+                                </p>
+                                <div class="text-right">
+                                    <b th:text="'￥' + ${menu.price}">￥00.00</b>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主食分类 -->
+            <div class="module category-content" id="category-主食" data-category="主食">
+                <div class="hd">
+                    <h2>主食</h2>
+                </div>
+                <div class="bd">
+                    <div class="data">
+                        <ul>
+                            <li class="data-item-li" th:each="menu : ${session.menuList}" th:if="${menu.category == '主食'}">
+                                <div class="to-big">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}">
+                                        <img th:src="@{|/picture/${menu.picture}|}" alt="菜品图片" />
+                                    </a>
+                                </div>
+                                <p class="text-right">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}" th:text="${menu.name}">菜品</a>
+                                </p>
+                                <div class="text-right">
+                                    <b th:text="'￥' + ${menu.price}">￥00.00</b>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 饮品分类 -->
+            <div class="module category-content" id="category-饮品" data-category="饮品">
+                <div class="hd">
+                    <h2>饮品</h2>
+                </div>
+                <div class="bd">
+                    <div class="data">
+                        <ul>
+                            <li class="data-item-li" th:each="menu : ${session.menuList}" th:if="${menu.category == '饮品'}">
+                                <div class="to-big">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}">
+                                        <img th:src="@{|/picture/${menu.picture}|}" alt="菜品图片" />
+                                    </a>
+                                </div>
+                                <p class="text-right">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}" th:text="${menu.name}">菜品</a>
+                                </p>
+                                <div class="text-right">
+                                    <b th:text="'￥' + ${menu.price}">￥00.00</b>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 悬浮购物车（修正标签错误） -->
+        <a th:href="@{/front/toShopCart}" class="floating-cart">
+            <i class="fa fa-shopping-cart"></i>
+        </a>
+    </main>
+</div>
+
+<!-- 轮播图JS逻辑 + 分类切换逻辑（修改后的部分） -->
+<script>
+    // 用立即执行函数隔离轮播图的全局变量，避免污染
+    (function() {
+        const imgListOne = document.querySelector('.img-list')
+        // 获取图片类数组，并将其转化为数组
+        let imgBoxList = Array.prototype.slice.call(document.querySelectorAll('.img-list .img-box'))
+        const imgBoxCount = imgBoxList.length
+        const root = document.documentElement;
+        const btnGroup = document.querySelector('.btn-group')
+        const lastBtn = document.querySelector('.last')
+        const nextBtn = document.querySelector('.next')
+        const lastImgBox = document.getElementById('last-img-box')
+
+        // 获取--post-spacing和--post-size的值
+        const postSpacing = Number(getComputedStyle(root).getPropertyValue('--post-spacing').replace("vw", ""));
+        const postSize = Number(getComputedStyle(root).getPropertyValue('--post-size').replace("vw", ""));
+
+        // 根据图片的数量动态获取img-list的宽度
+        let imgListLength = (postSize + postSpacing) * imgBoxCount
+        console.log(imgListLength);
+        // 根据图片的数量动态获取img-box的宽度
+        const imgBoxLength = postSize + postSpacing
+
+        let index = 0
+        let indexOne = 1
+        let timer = null
+        let animationTime = 0.5
+
+        // 初始化数组中元素的的顺序，将最后一张图片放在第一位与html部分图片展示位置一致
+        imgBoxList.unshift(imgBoxList.pop())
+        // 设置imgListOne动画时间
+        if (imgListOne) {
+            imgListOne.style.transition = animationTime + 's ease'
+        }
+
+        // 设置按钮出现时间（判断按钮组是否存在，避免报错）
+        if (btnGroup) {
+            setTimeout(function () {
+                btnGroup.style.opacity = '1'
+                btnGroup.style.bottom = '5%'
+            }, animationTime * 1000)
+        }
+
+        // 点击事件
+        function cilckFun(flag) {
+            //下一张 next
+            if (flag == 'next') {
+                index--
+                console.log(index);
+                // 因为右边没有显示的图片比较多，所以可以直接先整体向左移动
+                if (imgListOne) {
+                    imgListOne.style.left = imgBoxLength * index + "vw";
+                }
+                setTimeout(function () {
+                    if (imgListOne) {
+                        imgListOne.style.transition = 'none'
+                    }
+                    // 当点击下一个累计达到图片数量时，相当于要回到原点，则重置变量和位置
+                    if (Math.abs(index) == imgBoxCount) {
+                        index = 0
+                        if (imgListOne) {
+                            imgListOne.style.left = 0
+                        }
+                        imgBoxList.forEach(item => {
+                            if (item.id == 'last-img-box') {
+                                item.style.transform = `translateX(-160.68vw)`
+                            } else {
+                                item.style.transform = 'none'
+                            }
+                        });
+                    } else {
+                        // 当第一张图片为last-img-box时，说明已经跑完了一轮，则将其放在最后的位置，初始状态其为-160.68vw
+                        if (imgBoxList[0].id == 'last-img-box') {
+                            lastImgBox.style.transition = 'none'
+                            lastImgBox.style.transform = 'translateX(0px)'
+                        } else if (index >= 0) {
+                            /*
+                                这种情况是为了解决在点击完第last，再点击next时造成的bug问题，其实就是回退，再点击last之前
+                                没有加transform属性，点击last以后则添加了transform属性，再次点击next按钮后应该不加transform
+                            */
+                            imgBoxList[0].style.transform = 'none'
+                        } else {
+                            // 正常情况下，点击next，则将最左侧的图片移到最后
+                            imgBoxList[0].style.transform = 'translateX(160.68vw)'
+                        }
+                    }
+                    // 模拟移动情况，将最左侧的图片（元素）移动到最后
+                    imgBoxList.push(imgBoxList.shift())
+                }, animationTime * 1000)
+            } else {
+                // 上一张 last
+                index++
+                console.log(index);
+                // 模拟移动情况，把最右侧的图片（元素）移动到最前
+                imgBoxList.unshift(imgBoxList.pop())
+                // 因为左侧图片只会有一张，所以需要先移动图片到左侧，再进行imgListOne的移到
+                if (imgBoxList[0].id == 'last-img-box' && index != 0) {
+                    // 当第一张图片为last-img-box时，说明已经跑完了一轮，此时相对于一开始的位置为-321.36vw
+                    imgBoxList[0].style.transform = 'translateX(-321.36vw)'
+                } else if (index < 0) {
+                    // 这种情况与点击next按钮出现的回退现象一致
+                    imgBoxList[0].style.transform = 'none'
+                } else {
+                    // 正常情况下，点击last，则将最右侧的图片移到最前
+                    imgBoxList[0].style.transform = 'translateX(-160.68vw)'
+                }
+                if (imgListOne) {
+                    imgListOne.style.left = imgBoxLength * index + "vw";
+                }
+                if (lastImgBox) {
+                    lastImgBox.style.transition = 'none'
+                }
+                // 当点击下一个累计达到图片数量时，相当于要回到原点，则重置变量和位置
+                if (Math.abs(index) == imgBoxCount) {
+                    index = 0
+                    setTimeout(function () {
+                        if (imgListOne) {
+                            imgListOne.style.transition = 'none'
+                            imgListOne.style.left = 0
+                        }
+                        imgBoxList.forEach(item => {
+                            if (item.id == 'last-img-box') {
+                                item.style.transform = `translateX(-160.68vw)`
+                            } else {
+                                item.style.transform = 'none'
+                            }
+                        });
+                    }, animationTime * 1000)
+                }
+            }
+            if (imgListOne) {
+                imgListOne.style.transition = animationTime + 's ease'
+            }
+        }
+
+        //节流函数
+        function throttle(fn, delay) {
+            return function () {
+                if (timer) {
+                    return
+                }
+                fn.apply(this, arguments)
+                timer = setTimeout(() => {
+                    timer = null
+                }, delay)
+            }
+        }
+
+        // 修复：判断按钮是否存在，避免报错
+        if (nextBtn) {
+            nextBtn.onclick = throttle(() => cilckFun('next'), animationTime * 1000);
+        }
+        if (lastBtn) {
+            lastBtn.onclick = throttle(() => cilckFun('last'), animationTime * 1000);
+        }
+    })();
+
+    // 改用jQuery处理分类切换（解决DOM加载和冲突问题）
+    $(document).ready(function() {
+        // 调试：打印是否获取到元素，确认选择器正确
+        console.log('导航项数量：', $('.category-nav .nav-item').length);
+        console.log('内容项数量：', $('.category-content').length);
+
+        // 为每个导航项添加点击事件
+        $('.category-nav .nav-item').on('click', function() {
+            // 移除所有导航项的active类
+            $('.category-nav .nav-item').removeClass('active');
+            // 为当前点击的导航项添加active类
+            $(this).addClass('active');
+
+            // 获取当前分类名称
+            const category = $(this).data('category');
+            console.log('当前分类：', category); // 调试：查看分类名称是否正确
+
+            // 隐藏所有内容项
+            $('.category-content').removeClass('active');
+            // 显示对应分类的内容项（使用data-category属性匹配，避免中文ID编码问题）
+            $('.category-content[data-category="' + category + '"]').addClass('active');
+        });
+    });
+</script>
+
+<script type="text/javascript" th:src="@{https://code.getmdl.io/1.3.0/material.min.js}"></script>
+</body>
+</html>

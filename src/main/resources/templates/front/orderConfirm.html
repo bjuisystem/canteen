@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>确认订单</title>
+    <link rel="icon" sizes="192x192" th:href="@{/frontStatic/image/logo.png}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/main.css}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/shopcart.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{/frontStatic/css/sweetalert.css}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/order.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script type="text/javascript" th:src="@{/frontStatic/css/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/js/holder.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/js/sweetalert.min.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/js/jquery.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/js/front/sort.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/js/front/order.js}"></script>
+
+    <style th:inline="css">
+        /* 全局样式重置与基础设置 - 橘色系核心变量（与购物车页面一致） */
+        :root {
+            /* 橘色系主色/深色/浅色 */
+            --primary-color: #ff7d00; /* 主橘色 */
+            --primary-dark: #e66a00; /* 深橘色 */
+            --primary-light: #ff9533; /* 浅橘色 */
+            --accent-color: #ff7d00; /* 强调色（与主色一致） */
+            --accent-light: rgba(255, 125, 0, 0.2); /* 浅橘透明 */
+            --accent-lighter: rgba(255, 125, 0, 0.1); /* 更浅橘透明 */
+            /* 文本/背景色 */
+            --text-white: #ffffff;
+            --text-gray: #e0e0e0;
+            --text-light-gray: #b3b3b3;
+            --bg-black: #000000;
+            --bg-overlay: rgba(0, 0, 0, 0.75);
+            /* 卡片/边框色 */
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --card-bg-dark: rgba(0, 0, 0, 0.5); /* 加深卡片背景，提升对比 */
+            --border-color: rgba(255, 125, 0, 0.3); /* 橘色边框 */
+            --border-light: rgba(255, 125, 0, 0.1); /* 浅橘边框 */
+            /* 阴影/过渡 */
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-orange: 0 6px 18px rgba(255, 125, 0, 0.3); /* 橘色阴影 */
+            --shadow-orange-hover: 0 8px 24px rgba(255, 125, 0, 0.4); /* 橘色阴影hover */
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-black) url(/admin/images/bg.jpg) center center fixed;
+            background-size: cover;
+            color: var(--text-white);
+            font-family: 'Microsoft Yahei', 'PingFang SC', Arial, sans-serif;
+            line-height: 1.6;
+            position: relative;
+            min-height: 100vh;
+            padding: 30px 0; /* 优化上下内边距 */
+        }
+
+        /* 背景遮罩增强对比度 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-overlay);
+            z-index: -1;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--text-white);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        ul, li {
+            list-style: none;
+        }
+
+        /* 导航栏样式 - 优化汉堡菜单位置和交互（与购物车页面一致） */
+        .cd-header {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            background: transparent;
+            backdrop-filter: blur(5px); /* 新增毛玻璃效果，提升质感 */
+            padding: 10px 0; /* 优化导航栏内边距 */
+        }
+
+        .header-wrapper {
+            position: relative;
+            width: calc(100% - 60px);
+            margin-left: 30px;
+        }
+
+        .nav-but-wrap {
+            position: relative;
+            display: inline-block;
+            float: left;
+            padding-left: 10px;
+            padding-top: 5px; /* 调整顶部间距，优化垂直居中 */
+            margin-top: 0;
+            transition: var(--transition);
+            z-index: 101; /* 确保按钮在最上层 */
+        }
+
+        .menu-icon {
+            height: 30px;
+            width: 30px;
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+            display: block;
+        }
+
+        .menu-icon__line {
+            height: 2px;
+            width: 30px;
+            display: block;
+            background-color: var(--text-white);
+            margin-bottom: 7px;
+            cursor: pointer;
+            transition: background-color .5s ease, transform .2s ease;
+        }
+
+        .menu-icon__line-left {
+            width: 16.5px;
+            transition: all 200ms linear;
+        }
+
+        .menu-icon__line-right {
+            width: 16.5px;
+            float: right;
+            transition: all 200ms linear;
+        }
+
+        .menu-icon:hover .menu-icon__line-left,
+        .menu-icon:hover .menu-icon__line-right {
+            width: 30px;
+        }
+
+        .nav {
+            position: fixed;
+            z-index: 98;
+            visibility: hidden;
+        }
+
+        .nav:before, .nav:after {
+            content: "";
+            position: fixed;
+            top: 20px;
+            left: 30px;
+            width: 0;
+            height: 0;
+            background-color: rgba(20, 21, 26, 0.8);
+            border-bottom-right-radius: 200%;
+            z-index: -1;
+            transition: border-radius linear 0.8s, width cubic-bezier(0.77, 0, 0.175, 1) 0.6s, height cubic-bezier(0.77, 0, 0.175, 1) 0.6s;
+        }
+
+        .nav:after {
+            background-color: rgba(9, 9, 12, 0.95);
+            background-image: url('https://s3-us-west-2.amazonaws.com/s.cdpn.io/1462889/pat.svg');
+            background-position: bottom center;
+            background-repeat: no-repeat;
+            background-size: 300%;
+            transition-delay: 0s;
+            box-shadow: 6px 7px 28px 0 rgba(16, 16, 16, 0.5);
+        }
+
+        .nav:before {
+            transition-delay: .2s;
+        }
+
+        .nav__content {
+            position: fixed;
+            visibility: hidden;
+            top: 70px; /* 调整导航内容顶部间距 */
+            left: 30px;
+            width: 280px;
+            text-align: left;
+        }
+
+        .nav__list {
+            position: relative;
+            padding: 0;
+            margin: 0;
+            z-index: 2;
+        }
+
+        .nav__list-item {
+            position: relative;
+            display: block;
+            transition-delay: 0.8s;
+            opacity: 0;
+            text-align: left;
+            color: var(--text-white);
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            font-size: 20px;
+            line-height: 1.2;
+            letter-spacing: 1px;
+            transform: translate(30px, 0%);
+            transition: opacity .2s ease, transform .2s ease;
+            margin: 12px 0; /* 优化导航项间距 */
+        }
+
+        .nav__list-item a {
+            position: relative;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.7);
+            overflow: hidden;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            z-index: 2;
+            padding: 10px 30px; /* 优化内边距，提升点击区域 */
+            display: block; /* 改为block，提升点击体验 */
+            transition: all 200ms linear;
+            border-radius: 8px;
+        }
+
+        /* 导航高亮线条 - 改为橘色（与购物车页面一致） */
+        .nav__list-item a:after {
+            position: absolute;
+            content: '';
+            top: 50%;
+            left: 10px;
+            width: 4px;
+            height: 0;
+            opacity: 0;
+            background-color: var(--primary-color); /* 橘色高亮 */
+            z-index: 1;
+            transition: all 200ms linear;
+        }
+
+        .nav__list-item a:hover {
+            color: rgba(255, 255, 255, 1);
+            background: var(--accent-lighter); /* 浅橘背景hover */
+            padding-left: 35px;
+        }
+
+        .nav__list-item a:hover:after {
+            height: 60%;
+            opacity: 1;
+            top: 20%;
+        }
+
+        .nav__list-item.active-nav a {
+            color: rgba(255, 255, 255, 1);
+            background: var(--accent-light); /* 橘色背景激活态 */
+        }
+
+        .nav__list-item.active-nav a:after {
+            height: 60%;
+            opacity: 1;
+            top: 20%;
+        }
+
+        /* 导航激活状态 - 与购物车页面完全一致 */
+        body.nav-active .nav__content {
+            visibility: visible;
+        }
+
+        body.nav-active .menu-icon__line {
+            background-color: var(--text-white);
+            transform: translate(0px, 0px) rotate(-45deg);
+        }
+
+        body.nav-active .menu-icon__line-left {
+            width: 15px;
+            transform: translate(2px, 4px) rotate(45deg);
+        }
+
+        body.nav-active .menu-icon__line-right {
+            width: 15px;
+            float: right;
+            transform: translate(-3px, -3.5px) rotate(45deg);
+        }
+
+        body.nav-active .menu-icon:hover .menu-icon__line-left,
+        body.nav-active .menu-icon:hover .menu-icon__line-right {
+            width: 15px;
+        }
+
+        body.nav-active .nav {
+            visibility: visible;
+        }
+
+        body.nav-active .nav:before,
+        body.nav-active .nav:after {
+            width: 280px;
+            height: 420px; /* 微调导航背景高度 */
+            border-radius: 20px;
+        }
+
+        body.nav-active .nav:after {
+            transition-delay: .1s;
+        }
+
+        body.nav-active .nav:before {
+            transition-delay: 0s;
+        }
+
+        body.nav-active .nav__list-item {
+            opacity: 1;
+            transform: translateX(0%);
+            transition: opacity .3s ease, transform .3s ease, color .3s ease;
+        }
+
+        body.nav-active .nav__list-item:nth-child(1) {
+            transition-delay: 0.8s;
+        }
+
+        body.nav-active .nav__list-item:nth-child(2) {
+            transition-delay: 0.9s;
+        }
+
+        body.nav-active .nav__list-item:nth-child(3) {
+            transition-delay: 1s;
+        }
+
+        body.nav-active .nav__list-item:nth-child(4) {
+            transition-delay: 1.1s;
+        }
+
+        /* 页面主容器 - 优化间距和排版（与购物车页面一致） */
+        #main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            margin-top: 90px; /* 适配导航栏高度，优化顶部间距 */
+            padding-bottom: 50px;
+        }
+
+        /* 页面标题样式 - 优化字体和间距（与购物车页面一致） */
+        .page-title {
+            text-align: center;
+            margin-bottom: 50px; /* 增加标题下间距 */
+            position: relative;
+            padding-bottom: 20px; /* 增加标题下内边距 */
+        }
+
+        .page-title h1 {
+            font-size: 36px; /* 放大标题字体 */
+            font-weight: 600;
+            color: var(--text-white);
+            margin-bottom: 10px;
+        }
+
+        .page-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px; /* 加长下划线 */
+            height: 3px;
+            background: var(--accent-color); /* 橘色下划线 */
+            border-radius: 3px;
+        }
+
+        /* 订单信息标题 - 优化样式 */
+        .order-info-title {
+            color: var(--text-white);
+            font-size: 22px; /* 放大字体 */
+            margin: 30px 0 25px; /* 优化间距 */
+            padding-bottom: 12px; /* 增加下划线内边距 */
+            border-bottom: 1px solid var(--border-light); /* 橘色边框 */
+            font-weight: 500;
+        }
+
+        /* 订单商品表格样式 - 优化行高和hover效果（与购物车页面一致） */
+        #cart-table {
+            width: 100%;
+            background: var(--card-bg-dark);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 40px; /* 增加表格下间距 */
+            border: 1px solid var(--border-light); /* 增加表格边框，提升质感 */
+        }
+
+        #cart-table th {
+            background: var(--accent-light); /* 浅橘背景表头 */
+            color: var(--text-white);
+            font-weight: 600;
+            padding: 20px 15px; /* 增加表头内边距 */
+            text-align: center;
+            border-bottom: 1px solid var(--border-color); /* 橘色边框 */
+            font-size: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        #cart-table td {
+            color: var(--text-gray);
+            padding: 22px 15px; /* 增加单元格内边距，优化行高 */
+            text-align: center;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+            transition: background-color 0.3s ease; /* 新增单元格hover过渡 */
+        }
+
+        /* 表格行hover效果 - 新增（与购物车页面一致） */
+        #cart-table tbody tr:hover td {
+            background-color: rgba(255, 125, 0, 0.05); /* 浅橘背景hover */
+            color: var(--text-white);
+        }
+
+        /* 商品图片单元格 - 优化图片显示（与购物车页面一致） */
+        #cart-table td.product-thumbnail {
+            padding: 10px;
+        }
+
+        #cart-table td.product-thumbnail img {
+            border-radius: 8px;
+            max-width: 90px; /* 放大商品图片 */
+            height: auto;
+            object-fit: cover;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 2px solid var(--border-light); /* 增加图片边框 */
+        }
+
+        /* 菜品名称样式 - 优化字体和间距（与购物车页面一致） */
+        #cart-table td.product-name {
+            text-align: left;
+            padding-left: 25px; /* 增加左内边距 */
+            font-weight: 500;
+            color: var(--text-white);
+            font-size: 16px; /* 放大菜品名称字体 */
+        }
+
+        /* 价格样式 - 橘色突出价格（与购物车页面一致） */
+        .amount-list {
+            color: var(--primary-light); /* 浅橘色价格 */
+            font-weight: 600;
+            font-size: 16px; /* 放大价格字体 */
+        }
+
+        /* 总价区域样式 - 优化布局和边框（与购物车页面一致） */
+        .cart_totals {
+            background: rgba(0, 0, 0, 0.6); /* 加深背景，提升对比 */
+            border-radius: 12px;
+            padding: 35px; /* 增加内边距 */
+            border: 1px solid var(--border-color); /* 橘色边框 */
+            margin-top: 20px;
+            max-width: 450px; /* 加宽总价区域 */
+            margin-left: auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* 增加阴影 */
+        }
+
+        .cart_totals h2 {
+            color: var(--text-white);
+            font-size: 24px; /* 放大标题字体 */
+            margin-bottom: 30px; /* 增加标题下间距 */
+            border-bottom: 2px solid var(--accent-color); /* 橘色下划线 */
+            padding-bottom: 15px; /* 增加下划线内边距 */
+            font-weight: 600;
+        }
+
+        .shop_table {
+            width: 100%;
+        }
+
+        .shop_table th {
+            color: var(--text-light-gray); /* 浅灰色表头，提升层级 */
+            font-weight: 500;
+            font-size: 16px;
+            text-align: left;
+            padding: 15px 0; /* 增加内边距 */
+            width: 40%;
+            border: none;
+        }
+
+        .shop_table td {
+            color: var(--text-white);
+            font-size: 16px;
+            text-align: right;
+            padding: 15px 0; /* 增加内边距 */
+            font-weight: 600;
+            border: none;
+        }
+
+        .cart-subtotal {
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 10px; /* 增加小计下间距 */
+        }
+
+        .order-total td {
+            color: var(--primary-light); /* 浅橘色总额 */
+            font-size: 20px; /* 放大总额字体 */
+            padding-top: 20px; /* 增加总额上间距 */
+        }
+
+        /* 结算按钮样式 - 橘色渐变+优化交互（与购物车页面一致） */
+        .confirm-orders {
+            display: inline-block;
+            width: 100%;
+            height: 60px;
+            line-height: 60px; /* 垂直居中文字 */
+            padding: 0 36px; /* 调整内边距，配合line-height */
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); /* 橘色渐变 */
+            color: var(--text-white) !important;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            box-shadow: var(--shadow-orange); /* 橘色阴影 */
+            position: relative;
+            overflow: hidden;
+            margin-top: 30px; /* 增加按钮上间距 */
+        }
+
+        .confirm-orders:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #cc5c00 100%); /* 加深渐变hover */
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-orange-hover); /* 加深阴影hover */
+        }
+
+        /* 按钮点击波纹效果 - 优化颜色为浅橘（与购物车页面一致） */
+        .confirm-orders::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .confirm-orders:active::after {
+            width: 300px;
+            height: 300px;
+            opacity: 0;
+        }
+
+        /* 响应式适配 - 优化移动端显示（与购物车页面一致，调整表格逻辑） */
+        @media (max-width: 992px) {
+            #main {
+                margin-top: 80px;
+                padding: 0 15px;
+            }
+
+            .cart_totals {
+                max-width: 100%;
+                margin-left: 0;
+                margin-top: 30px; /* 增加移动端总价区域上间距 */
+            }
+
+            .nav-but-wrap {
+                padding-top: 5px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* 移动端表格堆叠显示 - 优化样式 */
+            #cart-table thead {
+                display: none;
+            }
+
+            #cart-table tr {
+                display: block;
+                margin-bottom: 25px; /* 增加表格行间距 */
+                border-radius: 12px;
+                background: var(--card-bg-dark);
+                border: 1px solid var(--border-color); /* 橘色边框 */
+            }
+
+            #cart-table td {
+                display: block;
+                text-align: right;
+                padding: 15px 15px; /* 调整单元格内边距 */
+                border-bottom: 1px solid var(--border-light);
+                position: relative;
+                font-size: 14px; /* 缩小移动端字体 */
+            }
+
+            #cart-table td:last-child {
+                border-bottom: none;
+            }
+
+            #cart-table td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 15px;
+                width: 45%;
+                text-align: left;
+                font-weight: 500;
+                color: var(--text-white);
+                font-size: 14px; /* 统一标签字体大小 */
+            }
+
+            #cart-table td.product-thumbnail {
+                text-align: center;
+                padding: 15px;
+            }
+
+            #cart-table td.product-thumbnail:before {
+                display: none;
+            }
+
+            #cart-table td.product-thumbnail img {
+                max-width: 70px; /* 缩小移动端商品图片 */
+            }
+
+            #cart-table td.product-name {
+                text-align: right;
+                padding-left: 0;
+                font-size: 14px; /* 缩小移动端菜品名称字体 */
+            }
+
+            .page-title h1 {
+                font-size: 28px; /* 缩小移动端标题字体 */
+            }
+
+            .nav__content {
+                width: 250px;
+            }
+
+            body.nav-active .nav:before,
+            body.nav-active .nav:after {
+                width: 250px;
+                height: 400px;
+            }
+
+            .nav-but-wrap {
+                padding-top: 5px;
+                padding-left: 5px;
+            }
+
+            /* 移动端总价区域优化 */
+            .cart_totals {
+                padding: 25px;
+            }
+            .cart_totals h2 {
+                font-size: 22px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #main {
+                margin-top: 70px;
+                padding: 0 10px;
+            }
+
+            .cart_totals {
+                padding: 20px 15px;
+            }
+
+            .confirm-orders {
+                height: 50px;
+                line-height: 50px; /* 调整移动端按钮高度 */
+                padding: 0 24px;
+                font-size: 16px;
+            }
+
+            .nav-but-wrap {
+                padding-top: 5px;
+            }
+
+            .nav__content {
+                left: 20px;
+                top: 60px;
+            }
+
+            body.nav-active .nav:before,
+            body.nav-active .nav:after {
+                left: 20px;
+                width: 220px; /* 缩小移动端导航背景宽度 */
+                height: 380px;
+            }
+
+            /* 移动端标题优化 */
+            .page-title {
+                margin-bottom: 30px;
+                padding-bottom: 15px;
+            }
+            .page-title h1 {
+                font-size: 24px;
+            }
+            .page-title:after {
+                width: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- 导航栏 - 仅保留汉堡菜单按钮，无黑色背景 -->
+<header class="cd-header">
+    <div class="header-wrapper">
+        <div class="nav-but-wrap">
+            <div class="menu-icon hover-target">
+                <span class="menu-icon__line menu-icon__line-left"></span>
+                <span class="menu-icon__line"></span>
+                <span class="menu-icon__line menu-icon__line-right"></span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- 导航菜单内容 -->
+<div class="nav">
+    <div class="nav__content">
+        <ul class="nav__list">
+            <li class="nav__list-item">
+                <a th:href="@{/front/toMain}" class="hover-target">
+                    <i class="fa fa-home"></i> 首页
+                </a>
+            </li>
+            <li class="nav__list-item">
+                <a th:href="@{/front/toShopCart}" class="hover-target">
+                    <i class="fa fa-shopping-cart"></i> 购物车
+                </a>
+            </li>
+            <li class="nav__list-item">
+                <a th:href="@{/front/toOrder}" class="hover-target">
+                    <i class="fa fa-list"></i> 我的订单
+                </a>
+            </li>
+            <li class="nav__list-item">
+                <a th:href="@{/front/toInfo}" class="hover-target">
+                    <i class="fa fa-user"></i> 账户管理
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- 确认订单主内容 -->
+<div id="main" class="container">
+    <!-- 页面标题 -->
+    <div class="page-title">
+        <h1>确认订单</h1>
+    </div>
+
+    <!-- 订单商品表格 -->
+    <div class="wishlist-table wishlist-table-2 table-responsive">
+        <table id="cart-table">
+            <thead>
+            <tr>
+                <th class="product-thumbnail product-thumbnail-2">图片</th>
+                <th class="product-name product-name_2">菜品</th>
+                <th class="product-price">计量单位</th>
+                <th class="product-price">价格</th>
+                <th class="product-stock-stauts">数量</th>
+                <th class="product-add-to-cart">总价</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="sc:${session.shopCartList}">
+                <td class="product-thumbnail product-thumbnail-2" data-label="图片">
+                    <img th:src="@{|/picture/${sc.picture}|}" alt="菜品图片">
+                </td>
+                <td class="product-name product-name_2" data-label="菜品" th:text="${sc.name}">无</td>
+                <td class="product-price" data-label="计量单位" th:text="${sc.unit}">无</td>
+                <td class="product-price" data-label="价格">
+                    <span th:text="'￥' + ${sc.price}" class="amount-list amount-list-2">￥00.00</span>
+                </td>
+                <td class="product-stock-status" data-label="数量">
+                    <div class="latest_es_from_2">
+                        <span th:text="${sc.weight}">无</span>
+                    </div>
+                </td>
+                <td class="product-price" data-label="总价">
+                    <span th:text="'￥' + ${sc.totalPrice}" class="amount-list amount-list-2">￥00.00</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 总价区域 -->
+    <div class="row">
+        <div class="col-md-6 col-md-offset-6 col-xs-12">
+            <div class="cart_totals">
+                <h2>订单总价</h2>
+                <table class="shop_table shop_table_responsive">
+                    <tbody>
+                    <tr class="cart-subtotal">
+                        <th>个数总计</th>
+                        <td data-title="Subtotal">
+                            <span class="woocommerce-Price-amount amount">
+                                <span class="woocommerce-Price-currencySymbol" id="total-old" th:text="${session.totalWeight}">无</span>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr class="order-total">
+                        <th>实付款</th>
+                        <td data-title="Total">
+                            <strong>
+                                <span class="woocommerce-Price-amount amount">￥
+                                    <span class="woocommerce-Price-currencySymbol" id="total-new" th:text="${session.totalPrice}">无</span>
+                                </span>
+                            </strong>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="wc-proceed-to-checkout">
+                    <button id="confirm-orders"
+                            class="button_act button_act-tc confirm-orders pull-right">
+                        <i class="fa fa-check-circle"></i> 结算
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 导航交互JS -->
+<script>
+    (function ($) {
+        "use strict";
+
+        // 导航核心逻辑
+        var app = function () {
+            var body = undefined;
+            var menu = undefined;
+            var init = function init() {
+                body = document.querySelector('body');
+                menu = document.querySelector('.menu-icon');
+                applyListeners();
+            };
+
+            var applyListeners = function applyListeners() {
+                menu.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    toggleClass(body, 'nav-active');
+                });
+            };
+
+            var toggleClass = function toggleClass(element, stringClass) {
+                if (element.classList.contains(stringClass)) {
+                    element.classList.remove(stringClass);
+                } else {
+                    element.classList.add(stringClass);
+                }
+            };
+
+            init();
+        }();
+
+    })(jQuery);
+</script>
+
+<!-- 订单页面JS逻辑 -->
+<script>
+    $(document).ready(function() {
+        console.log("确认订单页面加载完成");
+
+        // 点击空白处关闭导航菜单
+        $(document).click(function(e) {
+            if (!$(e.target).closest('.menu-icon, .nav').length) {
+                $('body').removeClass('nav-active');
+            }
+        });
+
+        // 结算按钮点击事件 - 调整确认按钮颜色为橘色
+        $('#confirm-orders').on('click', function() {
+            swal({
+                title: "确认结算？",
+                text: "您确定要提交此订单吗？",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#ff7d00", // 改为橘色
+                confirmButtonText: "确认",
+                cancelButtonText: "取消",
+                closeOnConfirm: false
+            }, function() {
+                // 这里添加订单提交的AJAX逻辑
+                // 示例成功提示
+                swal("成功!", "订单提交成功!", "success");
+                setTimeout(function() {
+                    window.location.href = "/front/toOrder";
+                }, 1500);
+            });
+        });
+    });
+</script>
+</body>
+</html>

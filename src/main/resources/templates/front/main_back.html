@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>餐厅首页</title>
+    <link rel="stylesheet" th:href="@{/frontStatic/css/main.css}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/bootstrap/css/bootstrap.min.css}">
+    <link rel="icon" sizes="192x192" th:href="@{/frontStatic/image/logo.png}">
+    <script type="text/javascript" th:src="@{/frontStatic/js/jquery.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/css/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/js/holder.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/js/front/sort.js}"></script>
+    <style>
+        /* 悬浮购物车样式 */
+        .floating-cart {
+            position: fixed;
+            bottom: 20px;
+            right: 13%;
+            background-color: #F22E00;
+            color: #fff;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s;
+            width: 60px;
+            height: 60px;
+            font-size: 40px;
+        }
+        .floating-cart:hover {
+            background-color: #FF5733;
+        }
+
+        /* 轮播图样式（完全移除asset/font相关代码，修复text-rendering） */
+        :root {
+            --post-spacing: 1.78vw;
+            --post-size: 25vw;
+            --mask-size: 100vw;
+        }
+
+        /* 修复：text-rendering 移到body（仅保留合法属性） */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* 轮播图容器样式隔离（修复高度和mask导致的隐藏问题） */
+        .banner-container {
+            position: relative;
+            width: 100%;
+            margin: 20px 0;
+            height: 400px; /* 固定高度，替代原calc计算（避免vw单位兼容问题） */
+            border: 1px solid #eee; /* 临时加边框，方便查看容器是否显示 */
+            overflow: hidden; /* 隐藏溢出内容 */
+        }
+        .banner-container .title {
+            position: absolute;
+            left: 50%;
+            top: 5%;
+            transform: translate(-50%, -5%);
+            z-index: 10;
+            width: 100%;
+            text-align: center;
+        }
+        .banner-container .title p {
+            font-size: 2rem; /* 缩小字体，避免超出屏幕 */
+            font-weight: 800;
+            white-space: nowrap;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        #banner {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            height: 100%; /* 继承容器高度 */
+            /* 移除mask属性（该属性是导致轮播图隐藏的主要原因） */
+        }
+
+
+        #banner .img-wrapper {
+            display: flex;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform: translate(13.39vw, 0);
+            animation: admission 1.5s;
+        }
+        #banner .img-wrapper .img-box {
+            height: 100%;
+            display: inline-block;
+            margin-right: var(--post-spacing);
+            position: relative;
+            cursor: pointer;
+        }
+        #banner .img-wrapper .img-box .info {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 100%;
+            background: rgba(23, 23, 23, 0.5);
+            text-align: center;
+            color: #fff9f1;
+            font-size: 4rem;
+            z-index: 5;
+            font-family: Arial, sans-serif;
+        }
+        #banner .img-wrapper .img-box img {
+            width: var(--post-size);
+            height: 100%;
+            object-position: center;
+            object-fit: cover;
+        }
+        #banner .img-wrapper .img-box:last-child {
+            transform: translate(-160.68vw, 0);
+        }
+
+        .btn-group {
+            height: 15vh;
+            position: absolute;
+            left: 50%;
+            bottom: 0%;
+            transform: translate(-50%, -50%);
+            transition: 1s;
+            opacity: 0;
+            z-index: 10;
+        }
+        .btn-group .btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 1px solid #171717;
+            background-color: #fff;
+            margin: 10px;
+            cursor: pointer;
+            transition: 0.4s;
+            box-sizing: border-box;
+        }
+        .btn-group .btn:hover {
+            transform: scale(1.2);
+            background-color: #000;
+        }
+        .btn-group .btn:hover .icon {
+            fill: #fff;
+        }
+        .btn-group .btn .icon {
+            width: 30px;
+            height: 30px;
+        }
+        .btn-group .btn .right {
+            transform: rotate(180deg);
+        }
+
+        .img-list {
+            left: 0;
+        }
+
+        @keyframes admission {
+            0% {
+                transform: translate(140vw, 0);
+            }
+            100% {
+                transform: translate(13.39vw, 0);
+            }
+        }
+
+        #main {
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+<div id="main" class="container">
+    <div id="header">
+        <div id="header-nav">
+            <nav class="navbar navbar-default" id="header-nav-middle">
+                <div class="container-fluid">
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav">
+                            <li><a class="a-color" th:href="@{/front/toMain}">首页</a></li>
+                            <li><a class="a-color" th:href="@{/front/toOrder}">我的订单</a></li>
+                            <li><a th:href="@{/front/toShopCart}"> <<i class="fa fa-shopping-cart" style="color: #F22E00"></i>购物车</a></li>
+                            <li>
+                                <a th:href="@{/front/toInfo}" style="color: #F22E00" th:text="${session.currUser.name}">
+                                    name
+                                    <span class="glyphicon glyphicon-triangle-bottom" style="font-size: 5px;margin-left: 7px;" aria-hidden="true"></span>
+                                </a>
+                            </li>
+                        </ul>
+                        <span><a th:href="@{/front/logout}" class="login-out" style="float:right;margin-top:15px">退出登录</a></span>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <div class="header-bottom">
+            <div id="mycarousel" class="carousel slide" data-ride="carousel" style="width: 100%; height: 250px">
+                <div class="carousel-inner">
+                    <div class="item active">
+                        <img th:src="@{/frontStatic/image/banner1.jpg}" alt="" style="width: 100%; height: 250px">
+                    </div>
+                    <div class="item">
+                        <img th:src="@{/frontStatic/image/banner2.jpg}" alt="" style="width: 100%; height: 250px">
+                    </div>
+                    <div class="item">
+                        <img th:src="@{/frontStatic/image/banner3.jpg}" alt="" style="width: 100%; height: 250px">
+                    </div>
+                </div>
+                <ol class="carousel-indicators">
+                    <li data-target="#mycarousel" data-slide-to="0" class="active"></li>
+                    <li data-target="#mycarousel" data-slide-to="1"></li>
+                    <li data-target="#mycarousel" data-slide-to="2"></li>
+                </ol>
+            </div>
+            <div class="clear-float"></div>
+        </div>
+    </div>
+
+    <!-- 轮播图区域（完全移除asset/font相关依赖） -->
+    <div class="banner-container">
+        <div class="title">
+            <p> Hello! 👋🏾 Can I have a triple connection?</p>
+        </div>
+        <div id="banner">
+            <div class="img-list img-wrapper">
+                <div class="img-box">
+                    <div class="info">
+                        <h3>One click triple connection</h3>
+                    </div>
+                    <img th:src="@{/picture/1.jpg}" alt="轮播图1">
+                </div>
+                <div class="img-box">
+                    <div class="info">
+                        <h3>One click triple connection</h3>
+                    </div>
+                    <img th:src="@{/picture/2.jpg}" alt="轮播图2">
+                </div>
+                <div class="img-box">
+                    <div class="info">
+                        <h3>One click triple connection</h3>
+                    </div>
+                    <img th:src="@{/picture/1.jpg}" alt="轮播图3">
+                </div>
+                <div class="img-box">
+                    <div class="info">
+                        <h3>One click triple connection</h3>
+                    </div>
+                    <img th:src="@{/picture/1.jpg}" alt="轮播图4">
+                </div>
+                <div class="img-box">
+                    <div class="info">
+                        <h3>One click triple connection</h3>
+                    </div>
+                    <img th:src="@{/picture/1.jpg}" alt="轮播图5">
+                </div>
+                <div class="img-box" id="last-img-box">
+                    <div class="info">
+                        <h3>One click triple connection</h3>
+                    </div>
+                    <img th:src="@{/picture/1.jpg}" alt="轮播图6">
+                </div>
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="last btn">
+                <svg class="icon left" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+                    <path d="M862.485 481.154H234.126l203.3-203.3c12.497-12.497 12.497-32.758 0-45.255s-32.758-12.497-45.255 0L135.397 489.373c-12.497 12.497-12.497 32.758 0 45.254l256.774 256.775c6.249 6.248 14.438 9.372 22.627 9.372s16.379-3.124 22.627-9.372c12.497-12.497 12.497-32.759 0-45.255l-203.3-203.301h628.36c17.036 0 30.846-13.81 30.846-30.846s-13.81-30.846-30.846-30.846z" fill="#000"></path>
+                </svg>
+            </button>
+            <button class="next btn">
+                <svg class="icon right" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" width="30" height="30">
+                    <path d="M862.485 481.154H234.126l203.3-203.3c12.497-12.497 12.497-32.758 0-45.255s-32.758-12.497-45.255 0L135.397 489.373c-12.497 12.497-12.497 32.758 0 45.254l256.774 256.775c6.249 6.248 14.438 9.372 22.627 9.372s16.379-3.124 22.627-9.372c12.497-12.497 12.497-32.759 0-45.255l-203.3-203.301h628.36c17.036 0 30.846-13.81 30.846-30.846s-13.81-30.846-30.846-30.846z" fill="#000"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="module">
+            <div class="hd">
+                <h2>菜肴</h2>
+                <hr>
+            </div>
+            <div class="bd">
+                <div class="data">
+                    <ul style="display: flex; flex-wrap: wrap; gap: 20px; padding: 0;">
+                        <li class="data-item-li" th:each="menu : ${session.menuList}" th:if="${menu.category == '菜肴'}" style="list-style: none; width: calc(25% - 20px);">
+                            <div>
+                                <div class="to-big">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}">
+                                        <img th:src="@{|/picture/${menu.picture}|}" alt="菜品图片" style="width: 100%; height: auto;"/>
+                                    </a>
+                                </div>
+                                <p class="text-right" style="text-align: center;">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}" th:text="${menu.name}">菜品</a>
+                                </p>
+                                <div class="text-right" style="text-align: center;">
+                                    <b th:text="'￥' + ${menu.price}">￥00.00</b>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="module">
+            <div class="hd">
+                <h2>甜点</h2>
+                <hr>
+            </div>
+            <div class="bd">
+                <div class="data">
+                    <ul style="display: flex; flex-wrap: wrap; gap: 20px; padding: 0;">
+                        <li class="data-item-li" th:each="menu : ${session.menuList}" th:if="${menu.category == '甜点'}" style="list-style: none; width: calc(25% - 20px);">
+                            <div>
+                                <div class="to-big">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}">
+                                        <img th:src="@{|/picture/${menu.picture}|}" alt="菜品图片" style="width: 100%; height: auto;"/>
+                                    </a>
+                                </div>
+                                <p class="text-right" style="text-align: center;">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}" th:text="${menu.name}">菜品</a>
+                                </p>
+                                <div class="text-right" style="text-align: center;">
+                                    <b th:text="'￥' + ${menu.price}">￥00.00</b>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="module">
+            <div class="hd">
+                <h2>主食</h2>
+                <hr>
+            </div>
+            <div class="bd">
+                <div class="data">
+                    <ul style="display: flex; flex-wrap: wrap; gap: 20px; padding: 0;">
+                        <li class="data-item-li" th:each="menu : ${session.menuList}" th:if="${menu.category == '主食'}" style="list-style: none; width: calc(25% - 20px);">
+                            <div>
+                                <div class="to-big">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}">
+                                        <img th:src="@{|/picture/${menu.picture}|}" alt="菜品图片" style="width: 100%; height: auto;"/>
+                                    </a>
+                                </div>
+                                <p class="text-right" style="text-align: center;">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}" th:text="${menu.name}">菜品</a>
+                                </p>
+                                <div class="text-right" style="text-align: center;">
+                                    <b th:text="'￥' + ${menu.price}">￥00.00</b>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="module">
+            <div class="hd">
+                <h2>饮品</h2>
+                <hr>
+            </div>
+            <div class="bd">
+                <div class="data">
+                    <ul style="display: flex; flex-wrap: wrap; gap: 20px; padding: 0;">
+                        <li class="data-item-li" th:each="menu : ${session.menuList}" th:if="${menu.category == '饮品'}" style="list-style: none; width: calc(25% - 20px);">
+                            <div>
+                                <div class="to-big">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}">
+                                        <img th:src="@{|/picture/${menu.picture}|}" alt="菜品图片" style="width: 100%; height: auto;"/>
+                                    </a>
+                                </div>
+                                <p class="text-right" style="text-align: center;">
+                                    <a th:href="@{|/front/toDetail/${menu.menuId}|}" th:text="${menu.name}">菜品</a>
+                                </p>
+                                <div class="text-right" style="text-align: center;">
+                                    <b th:text="'￥' + ${menu.price}">￥00.00</b>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a th:href="@{/front/toShopCart}" class="floating-cart" style="background: none;color: red;box-shadow: none;">
+        <<i class="fa fa-shopping-cart"></i>
+    </a>
+</div>
+
+<!-- 轮播图JS逻辑 -->
+<script>
+    $(document).ready(function() {
+        const imgListOne = document.querySelector('.img-list')
+        let imgBoxList = Array.prototype.slice.call(document.querySelectorAll('.img-list .img-box'))
+        const imgBoxCount = imgBoxList.length
+        const root = document.documentElement;
+        const btnGroup = document.querySelector('.btn-group')
+        const lastBtn = document.querySelector('.last')
+        const nextBtn = document.querySelector('.next')
+        const lastImgBox = document.getElementById('last-img-box')
+
+        const postSpacing = Number(getComputedStyle(root).getPropertyValue('--post-spacing').replace("vw", ""));
+        const postSize = Number(getComputedStyle(root).getPropertyValue('--post-size').replace("vw", ""));
+        const imgBoxLength = postSize + postSpacing
+
+        let index = 0
+        let timer = null
+        let animationTime = 0.5
+
+        // 初始化轮播图
+        imgBoxList.unshift(imgBoxList.pop())
+        imgListOne.style.transition = animationTime + 's ease'
+        setTimeout(() => {
+            btnGroup.style.opacity = '1'
+            btnGroup.style.bottom = '5%'
+        }, animationTime * 1000)
+
+        // 轮播切换逻辑
+        function switchSlide(flag) {
+            if (flag === 'next') {
+                index--
+                imgListOne.style.left = imgBoxLength * index + "vw";
+                setTimeout(() => {
+                    imgListOne.style.transition = 'none'
+                    if (Math.abs(index) === imgBoxCount) {
+                        index = 0
+                        imgListOne.style.left = 0
+                        imgBoxList.forEach(item => {
+                            item.style.transform = item.id === 'last-img-box' ? `translateX(-160.68vw)` : 'none'
+                        })
+                    } else {
+                        if (imgBoxList[0].id === 'last-img-box') {
+                            lastImgBox.style.transform = 'translateX(0)'
+                        } else if (index >= 0) {
+                            imgBoxList[0].style.transform = 'none'
+                        } else {
+                            imgBoxList[0].style.transform = 'translateX(160.68vw)'
+                        }
+                    }
+                    imgBoxList.push(imgBoxList.shift())
+                }, animationTime * 1000)
+            } else {
+                index++
+                imgBoxList.unshift(imgBoxList.pop())
+                if (imgBoxList[0].id === 'last-img-box' && index !== 0) {
+                    imgBoxList[0].style.transform = 'translateX(-321.36vw)'
+                } else if (index < 0) {
+                    imgBoxList[0].style.transform = 'none'
+                } else {
+                    imgBoxList[0].style.transform = 'translateX(-160.68vw)'
+                }
+                imgListOne.style.left = imgBoxLength * index + "vw";
+                if (Math.abs(index) === imgBoxCount) {
+                    index = 0
+                    setTimeout(() => {
+                        imgListOne.style.transition = 'none'
+                        imgListOne.style.left = 0
+                        imgBoxList.forEach(item => {
+                            item.style.transform = item.id === 'last-img-box' ? `translateX(-160.68vw)` : 'none'
+                        })
+                    }, animationTime * 1000)
+                }
+            }
+            imgListOne.style.transition = animationTime + 's ease'
+        }
+
+        // 节流函数
+        function throttle(fn, delay) {
+            return function () {
+                if (timer) return
+                fn.apply(this, arguments)
+                timer = setTimeout(() => timer = null, delay)
+            }
+        }
+
+        // 绑定按钮事件
+        nextBtn.onclick = throttle(() => switchSlide('next'), animationTime * 1000)
+        lastBtn.onclick = throttle(() => switchSlide('last'), animationTime * 1000)
+    })
+</script>
+</body>
+</html>

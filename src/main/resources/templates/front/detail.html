@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>菜品详情</title>
+    <!-- 外部资源引入 -->
+    <link rel="icon" sizes="192x192" th:href="@{/frontStatic/image/logo.png}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/font-awesome.min.css}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/style.css}">
+    <link rel="stylesheet" th:href="@{/frontStatic/css/shopdetail.css}">
+    <!-- 引入橙色核心样式文件（优先级最高） -->
+    <link rel="stylesheet" th:href="@{/frontStatic/css/dish-detail-orange.css}">
+    <!-- JS文件引入 -->
+    <script type="text/javascript" th:src="@{/frontStatic/js/jquery.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/css/bootstrap/js/bootstrap.min.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/js/front/sort.js}"></script>
+    <script type="text/javascript" th:src="@{/frontStatic/js/detail.js}"></script>
+</head>
+<body>
+<!-- 顶部横幅：橙色渐变 -->
+<div class="top-banner">
+    <span>今日特惠：满20减5 | 下单即送例汤</span>
+</div>
+
+<div class="elavator_area">
+    <div class="container">
+        <!-- 顶部导航栏：橙色风格 -->
+        <div class="row top-nav-row">
+            <div class="col-md-12">
+                <ul class="nav nav-pills pull-right top-nav">
+                    <li><a th:href="@{/front/toShopCart}">
+                        <!-- 购物车图标强制橙色（与第一个页面一致） -->
+                        <i class="fa fa-shopping-cart" style="color: #ff7d00"></i> 购物车
+                    </a></li>
+                    <li class="info-a dropdown">
+                        <!-- 我的账户链接强制橙色（与第一个页面一致） -->
+                        <a th:href="@{/front/toInfo}" style="color: #ff7d00" th:text="${session.currUser.name}">
+                            我的账户 <span class="glyphicon glyphicon-triangle-bottom" style="font-size: 5px;margin-left: 7px;"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a th:href="@{/front/toInfo}">账户管理</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a th:href="@{/front/logout}" class="login-out">退出登录</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 主Logo导航：橙色风格 -->
+        <div id="header-nav">
+            <nav class="navbar navbar-default" id="header-nav-middle">
+                <div class="container-fluid">
+                    <div class="navbar-header text-center" style="width: 100%;">
+                        <a class="navbar-brand" th:href="@{/front/toMain}">
+                            <!-- Logo文字样式（与第一个页面一致） -->
+                            <span class="logo-word" style="font-family:楷体; font-size: 32px; color: #ff7d00 !important;">大食堂</span>
+                            <span class="logo-subtitle" style="font-size: 14px; color: #999; margin-left: 10px;">线上点餐系统</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <!-- 面包屑导航：橙色风格 -->
+        <div class="shop_menu shop_menu_2 main-detail-div">
+            <ul class="cramb_area cramb_area_5 main-detail-nav">
+                <li><a th:href="@{/front/toMain}">首页</a></li>
+                <li><a th:href="@{/front/toOrder}">菜品列表</a></li>
+                <li class="br-active" th:text="${session.menuDetail.name}">菜品</li>
+            </ul>
+        </div>
+
+        <!-- 菜品详情主体：橙色风格 -->
+        <div class="row dish-detail-row">
+            <!-- 菜品图片区：原始放大逻辑 -->
+            <div class="col-lg-5 col-md-5 col-sm-12 col-xs-12">
+                <div class="shopdetails">
+                    <div id="leftbox">
+                        <div id="showbox">
+                            <img
+                                    th:src="${'/picture/' + (session.menuDetail?.picture ?: 'frontStatic/image/default-dish.png')}"
+                                    width="400" height="400"
+                                    alt="菜品图片"/>
+                        </div>
+                        <!-- 图片标签装饰：橙色风格（保留内联样式兜底） -->
+                        <div class="dish-tag" style="position: absolute; top: 20px; left: 20px; background: #ff7d00; color: #fff; padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 500;">
+                            人气推荐
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 菜品信息区：橙色风格 -->
+            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 dish-info-card">
+                <div class="elav_titel">
+                    <div class="elv_heading">
+                        <!-- 菜品标题样式（保留内联样式兜底） -->
+                        <h3 th:text="${session.menuDetail.name}" style="font-size: 28px; font-weight: 600; color: #333; margin-bottom: 10px;">菜品</h3>
+                        <!-- 评分元素（保留内联样式兜底） -->
+                        <div class="dish-rating" style="margin-bottom: 20px;">
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star"></i>
+                            <i class="fa fa-star-half-o"></i>
+                            <span style="color: #999; margin-left: 10px; font-size: 14px;">4.8分 · 200+评价</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="elav_info">
+                    <!-- 价格区：橙色突出 -->
+                    <div class="price_box price_box_acr new_meta">
+                        <span class="spical-price spical-price-2" th:text="'￥' + ${session.menuDetail.price}">￥00.00</span>
+                        <!-- 原价样式（补充内联样式兜底） -->
+                        <span class="original-price" style="color: #999; text-decoration: line-through; margin-left: 15px; font-size: 16px;" th:text="'￥' + ${session.menuDetail.price + 5}">￥05.00</span>
+                    </div>
+                    <!-- 菜品信息（补充内联样式：橙色图标+布局） -->
+                    <div class="new_meta dish-info-list">
+                        <span class="sku_wrapper big-font" style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <i class="fa fa-list-ul" style="color: #ff7d00; margin-right: 8px;"></i>
+                            类别: <span class="sku" th:text="${session.menuDetail.category}">无</span>
+                        </span>
+                        <span class="sku_wrapper big-font" style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <i class="fa fa-balance-scale" style="color: #ff7d00; margin-right: 8px;"></i>
+                            计量单位: <span class="sku" th:text="${session.menuDetail.unit}">无</span>
+                        </span>
+                        <span class="sku_wrapper big-font" style="display: flex; align-items: center; margin-bottom: 15px;">
+                            <i class="fa fa-clock-o" style="color: #ff7d00; margin-right: 8px;"></i>
+                            预计出餐: <span class="sku">15分钟</span>
+                        </span>
+                    </div>
+                    <!-- 数量+加购按钮：橙色风格 -->
+                    <div class="rel-div">
+                        <form class="cart-btn-area new_meta">
+                            <!-- 隐藏输入框 -->
+                            <input type="hidden" id="name" name="name" th:value="${session.menuDetail.name}"/>
+                            <input type="hidden" id="unit" name="unit" th:value="${session.menuDetail.unit}"/>
+                            <input type="hidden" id="price" name="price" th:value="${session.menuDetail.price}"/>
+                            <input type="hidden" id="picture" name="picture" th:value="${session.menuDetail.picture}"/>
+
+                            <!-- 数量选择器（使用CSS类名+保留内联样式兜底） -->
+                            <div class="num-selector" style="display: flex; align-items: center; border: 1px solid #ffd5a3; border-radius: 6px; overflow: hidden;">
+                                <button type="button" onclick="minusNum()">-</button>
+                                <input type="number" value="1" name="weight" id="weight" style="border: none; width: 60px; height: 48px; text-align: center; font-size: 18px; outline: none;">
+                                <button type="button" onclick="addNum()">+</button>
+                            </div>
+
+                            <!-- 加购按钮（保留内联样式兜底） -->
+                            <button class="add-tocart cart_zpf" type="button" id="formSubmit" style="background-color: #ff7d00 !important; border: none !important; border-radius: 6px !important; height: 48px !important; width: 180px !important; color: #fff !important; font-size: 16px !important; font-weight: 500 !important; display: flex !important; align-items: center !important; justify-content: center !important; gap: 8px !important; transition: all 0.3s ease;">
+                                <i class="fa fa-shopping-cart"></i> 加入购物车
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 菜品介绍区：橙色风格卡片（补充margin-top内联样式） -->
+        <div class="row dish-desc-row" style="margin-top: 30px;">
+            <div class="col-md-12">
+                <div class="dish-desc-card">
+                    <!-- 标题样式（保留内联样式兜底） -->
+                    <h4 style="font-size: 20px; font-weight: 600; color: #333; margin-bottom: 20px;">菜品介绍</h4>
+                    <p>
+                        <span th:text="${session.menuDetail.name}">本菜品</span>精选新鲜食材，由资深厨师精心烹制，口感鲜嫩多汁，营养丰富。选用当季时蔬搭配秘制酱料，色香味俱全，是食堂人气爆款之一，深受师生喜爱。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 底部版权区：橙色风格统一 -->
+<footer class="footer">
+    <p>© 2025 大食堂线上点餐系统 | 版权所有</p>
+</footer>
+
+<!-- JS部分：功能保留 -->
+<script>
+    $(document).ready(function () {
+        // 1. 图片放大逻辑
+        $("#showbox").hover(function() {
+            $(this).find("img").css("transform", "scale(1.05)");
+        }, function() {
+            $(this).find("img").css("transform", "scale(1)");
+        });
+
+        // 2. 数量校验逻辑
+        $("#weight").blur(function (){
+            var num = $("#weight").val();
+            if (num <= 0 || num > 9) {
+                $(this).val(1);
+            }
+        });
+
+        // 3. 加入购物车逻辑
+        $("#formSubmit").click(function (){
+            var name = $("#name").val();
+            var unit = $("#unit").val();
+            var price = $("#price").val();
+            var picture = $("#picture").val();
+            var weight = $("#weight").val();
+
+            if(!name || !unit || !price || !picture || !weight){
+                alert("参数异常，请刷新页面重试！");
+                return;
+            }
+
+            var data = {
+                "name": name,
+                "unit": unit,
+                "price": price,
+                "picture": picture,
+                "weight": weight
+            };
+
+            // 存入sessionStorage（和购物车互通）
+            var cartList = JSON.parse(sessionStorage.getItem("cartList")) || [];
+            cartList.push(data);
+            sessionStorage.setItem("cartList", JSON.stringify(cartList));
+
+            // AJAX请求
+            $.ajax({
+                url: '/shopCart/add',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: 'application/json;charset=utf-8',
+                type: 'post',
+                success: function(result) {
+                    if (result.code === 200) {
+                        alert(result.data);
+                    } else {
+                        alert(result.msg || "加入购物车失败");
+                    }
+                },
+                error: function(xhr, status, error){
+                    console.error("请求失败：", status, error);
+                    alert("网络异常或接口错误，已本地保存购物车数据！");
+                }
+            });
+        });
+    });
+
+    // 4. 数量增减逻辑
+    function addNum() {
+        var num = parseInt($("#weight").val());
+        if (num < 9) {
+            $("#weight").val(num + 1);
+        }
+    }
+    function minusNum() {
+        var num = parseInt($("#weight").val());
+        if (num > 1) {
+            $("#weight").val(num - 1);
+        }
+    }
+</script>
+</body>
+</html>

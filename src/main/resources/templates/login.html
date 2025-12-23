@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<title>登录</title>
+	<!-- 样式文件（路径保持原结构，避免404） -->
+	<link rel="icon" sizes="192x192" th:href="@{/admin/images/大食堂.jpg}">
+	<link rel="stylesheet" th:href="@{/component/pear/css/pear.css}" />
+	<link rel="stylesheet" th:href="@{/admin/css/other/login.css}" />
+</head>
+<!-- 代码结构：添加外层隔离类 .login-page，避免样式污染 -->
+<body class="login-page" th:background="|@{/admin/images/bg1.jpg}|">
+<div class="login-container">
+	<form class="layui-form" action="javascript:void(0);">
+		<!-- 登录标题 -->
+		<div class="layui-form-item login-title">
+			<div>请登录您的账号</div>
+		</div>
+		<!-- 用户名输入框 -->
+		<div class="layui-form-item">
+			<input placeholder="账 户" type="text" id="username" lay-verify="required"
+				   class="layui-input" />
+		</div>
+		<!-- 密码输入框 -->
+		<div class="layui-form-item">
+			<input placeholder="密 码" type="password" id="password" lay-verify="required"
+				   class="layui-input" />
+		</div>
+		<!-- 验证码区域 -->
+		<div class="layui-form-item login-code-group">
+			<input placeholder="验证码" type="text" id="code" lay-verify="required"
+				   class="layui-input login-code-input" />
+			<img th:src="@{/common/getCode}" class="login-code-img" id="codeImg"
+				 onclick="reClick()" alt="验证码"/>
+		</div>
+		<!-- 登录按钮 -->
+		<div class="layui-form-item">
+			<button type="button" class="pear-btn pear-btn-success login"
+					lay-submit lay-filter="login">登 录</button>
+		</div>
+	</form>
+</div>
+
+<!-- 资源引入 -->
+<script th:src="@{/component/layui/layui.js}"></script>
+<script th:src="@{/component/pear/pear.js}"></script>
+<script>
+	layui.use(['form', 'button', 'popup'], function() {
+		var $ = layui.$;
+		var form = layui.form;
+		var button = layui.button;
+		var popup = layui.popup;
+
+		// 登录提交（保留原逻辑，无修改）
+		form.on('submit(login)', function(data) {
+			var name = $('#username').val();
+			var password = $('#password').val();
+			var code = $('#code').val();
+			/// 登录
+			$.ajax({
+				url: "/login/userLogin",
+				type: "post",
+				data: {
+					'username': name,
+					'password': password,
+					'captcha': code
+				},
+				dataType: "json",
+				contentType: "application/x-www-form-urlencoded", // 默认， 如果传复杂对象用application/json
+				success: function (res){
+					if (res.code === 200) {
+						/// 动画
+						button.load({
+							elem: '.login',
+							time: 500,
+							done: function() {
+								popup.success(res.data, function() {
+									if (res.data === "员工登录成功") {
+										//location.href = "/front/toMain"
+										location.href = "/front/toMain"
+									}else{
+										location.href = "/back/toIndex"
+									}
+								});
+							}
+						})
+					}else{
+						popup.failure(res.msg, function (){
+							location.reload()
+						})
+					}
+				}
+			});
+			return false;
+		});
+	})
+	// 刷新验证码（保留原逻辑）
+	function reClick() {
+		document.getElementById("codeImg").src = "/common/getCode?time=" + new Date().getTime();
+	}
+</script>
+</body>
+</html>
